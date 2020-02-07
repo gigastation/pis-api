@@ -11,18 +11,32 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+import environ
 
+ROOT_DIR = environ.Path(__file__) - 3
+print(ROOT_DIR)
+env = environ.Env()
+env.read_env(str(ROOT_DIR.path('.env')))
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(os.path.dirname(
+    os.path.dirname(os.path.abspath(__file__))))
+
+# READ_DOT_ENV_FILE = env.bool('DJANGO_READ_DOT_ENV_FILE', default=False)
+# if READ_DOT_ENV_FILE:
+# OS environment variables take precedence over variables from .env
+env.read_env(str(ROOT_DIR.path('.env')))
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'c#31+=ye_xve_sh_xpolb1kz8tf#@s^8k=_eb03+=^6tm+=3()'
+# SECRET_KEY = 'c#31+=ye_xve_sh_xpolb1kz8tf#@s^8k=_eb03+=^6tm+=3()'
+SECRET_KEY = env('SECRET_KEY')
+EMAIL = env('EMAIL')
 
 # SECURITY WARNING: don't run with debug turned on in production!
+# DEBUG = env.bool('DEBUG', False)
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
