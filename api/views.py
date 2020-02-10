@@ -19,14 +19,15 @@ def products(request):
     token = 'Basic %s' % base64.b64encode(src.encode('utf-8')).decode('ascii')
     ITEMS_PER_PAGE = 10
     try:
-        
+
         r = requests.get('https://gigastation.jp/api/products',
                          headers={'Authorization': token},
                          params={'items_per_page': ITEMS_PER_PAGE})
         t = r.text
-        # print(t)
         j = json.loads(r.text)
+        # print(t)
+        # j = json.dumps(r.text)
         print(len(j['products']))
-        return HttpResponse(j, content_type="application/json")
+        return HttpResponse(t, content_type="application/json")
     except RequestException as e:
         print(e)
