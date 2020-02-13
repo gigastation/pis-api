@@ -9,3 +9,6 @@ class Product(models.Model):
     code = models.TextField()
     product_type = models.TextField()
     status = models.TextField()
+    updated_timestamp = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
