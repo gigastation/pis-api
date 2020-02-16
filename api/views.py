@@ -10,7 +10,7 @@ import json
 
 
 def index(request):
-    return HttpResponse("", content_type="application/json")
+    return HttpResponse("", content_type="application/json")src
 
 
 def products(request):
@@ -18,13 +18,22 @@ def products(request):
     src = '%s:%s' % (env('EMAIL'), env('SECRET_KEY'))
     token = 'Basic %s' % base64.b64encode(src.encode('utf-8')).decode('ascii')
     ITEMS_PER_PAGE = 10
+    url = 'https://gigastation.jp/api/products'
+    headers = {'Authorization': token}
     try:
+        # get number of total records
+        count = requests.get(url, headers=headers, params={'items_per_page': 1})
+        total_count = count.json()['params']['total_count']
+        total_count = int(total_count)
+        # num_of_loop = -(-total_count // ITEMS_PER_PAGE)
+        num_of_loop = 1
+        for page in range(1, num_of_loop):
+            r = requests.get(url,headers=headers,
+                params={'items_per_page': ITEMS_PER_PAGE, 'page': page})
+            print(page)
 
-        r = requests.get('https://gigastation.jp/api/products',
-                         headers={'Authorization': token},
-                         params={'items_per_page': ITEMS_PER_PAGE})
-        t = r.text
-        j = json.loads(r.text)
+        # t = r.text
+        # j = json.loads(r.text)
         # print(t)
         # j = json.dumps(r.text)
         print(len(j['products']))
