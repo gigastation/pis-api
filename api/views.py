@@ -10,7 +10,7 @@ import json
 
 
 def index(request):
-    return HttpResponse("", content_type="application/json")src
+    return HttpResponse("", content_type="application/json")
 
 
 def products(request):
