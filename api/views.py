@@ -7,6 +7,7 @@ import environ
 import json
 
 # Create your views here.
+env = environ.Env()
 
 
 def index(request):
@@ -14,22 +15,25 @@ def index(request):
 
 
 def products(request):
-    env = environ.Env()
-    src = '%s:%s' % (env('EMAIL'), env('SECRET_KEY'))
-    token = 'Basic %s' % base64.b64encode(src.encode('utf-8')).decode('ascii')
+    # env = environ.Env()
+    # src = '%s:%s' % (env('EMAIL'), env('SECRET_KEY'))
+    # token = 'Basic %s' % base64.b64encode(src.encode('utf-8')).decode('ascii')
+    # token = generateToken(from
     ITEMS_PER_PAGE = 10
-    url = 'https://gigastation.jp/api/products'
-    headers = {'Authorization': token}
+    url = apiUrl()
+    # headers = {'Authorization': token}
     try:
         # get number of total records
-        count = requests.get(url, headers=headers, params={'items_per_page': 1})
+        session = request.Session()
+        session.headers.update(requestHeader())
+        count = session.get(url, params={'items_per_page': 1})
         total_count = count.json()['params']['total_count']
         total_count = int(total_count)
         # num_of_loop = -(-total_count // ITEMS_PER_PAGE)
         num_of_loop = 1
         for page in range(1, num_of_loop):
-            r = requests.get(url,headers=headers,
-                params={'items_per_page': ITEMS_PER_PAGE, 'page': page})
+            r = session.get(
+                url, params={'items_per_page': ITEMS_PER_PAGE, 'page': page})
             print(page)
 
         # t = r.text
@@ -40,3 +44,13 @@ def products(request):
         return HttpResponse(t, content_type="application/json")
     except RequestException as e:
         print(e)
+
+
+def apiUrl():
+    return env('CSCART_API_URL')
+
+
+def requestHeader():
+    src = '%s:%s' % (env('EMAIL'), env('SECRET_KEY'))
+    token = 'Basic %s' % base64.b64encode(src.encode('utf-8')).decode('ascii')
+    return {'Authorization': token}
