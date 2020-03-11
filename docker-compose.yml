@@ -12,20 +12,20 @@ services:
       - "8000:8000"
     depends_on:
       - db
-  dynamodb:
-    container_name: dynamodb
-    image: amazon/dynamodb-local
-    command: -jar DynamoDBLocal.jar -dbPath /home/dynamodblocal/data
-    volumes:
-      - ./persist/dynamodb:/home/dynamodblocal/data
-    ports: 
-      - "50706:8000"
-  dynamodb-admin:
-    image: aaronshaf/dynamodb-admin
-    container_name: dynamodb-admin
-    environment: 
-      DYNAMO_ENDPOINT: http://dynamodb:8000
-    ports: 
-      - "50727:8001"
-    depends_on: 
-      - dynamodb
+  # dynamodb:
+  #   container_name: dynamodb
+  #   image: amazon/dynamodb-local
+  #   command: -jar DynamoDBLocal.jar -dbPath /home/dynamodblocal/data
+  #   volumes:
+  #     - ./persist/dynamodb:/home/dynamodblocal/data
+  #   ports: 
+  #     - "50706:8000"
+  # dynamodb-admin:
+  #   image: aaronshaf/dynamodb-admin
+  #   container_name: dynamodb-admin
+  #   environment: 
+  #     DYNAMO_ENDPOINT: http://dynamodb:8000
+  #   ports: 
+  #     - "50727:8001"
+  #   depends_on: 
+  #     - dynamodb

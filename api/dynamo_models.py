@@ -11,3 +11,4 @@ class Product(Model):
         host = 'http://dynamodb:8000'
         aws_access_key_id = 'my_access_key_id'
         aws_secret_access_key = 'my_secret_access_key'
+    product_id = UnicodeAttribute(hash_key=True)

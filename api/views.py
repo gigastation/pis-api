@@ -5,7 +5,6 @@ import requests
 import base64
 import environ
 import json
-from . import dynamo_models
 
 # Create your views here.
 env = environ.Env()
@@ -23,9 +22,10 @@ def products(request):
         # num_of_loop = -(-total_count // ITEMS_PER_PAGE)
         num_of_loop = 1
         for page in range(1, num_of_loop):
-            r = getProducts(page=page)
-            saveProduct(r)
-            print(page)
+            records = getProducts(page=page)
+            for item in records:
+                saveProduct(item)
+                print(item)
 
         return HttpResponse("Successs", content_type="application/json")
     except RequestException as e:
