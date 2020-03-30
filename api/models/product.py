@@ -3,12 +3,14 @@ from django.utils import timezone
 import requests
 import environ
 import base64
+import math
 from .category import Category
 
 env = environ.Env()
 
+
 class Product(models.Model):
-    product_id = models.IntegerField()
+    product_id = models.IntegerField(unique=True)
     name = models.TextField()
     code = models.TextField()
     product_type = models.TextField()
@@ -17,7 +19,7 @@ class Product(models.Model):
     age_verification = models.TextField(null=True)
     amount = models.IntegerField(null=True)
     avail_since = models.IntegerField(null=True)
-    average_rating = models.IntegerField(null=True)
+    average_rating = models.FloatField(null=True)
     base_price = models.DecimalField(
         decimal_places=6, max_digits=15, null=True)
     buy_now_url = models.TextField(default=None)
@@ -35,6 +37,8 @@ class Product(models.Model):
     facebook_obj_type = models.TextField(default=None)
     free_shipping = models.TextField(default=None)
     has_options = models.TextField(default=None)
+    list_discount = models.TextField(default=None, null=True)
+    list_discount_prc = models.TextField(default=None, null=True)
     height = models.TextField(default=None)
     # image_pairs = models.TextField(default=None)
     is_edp = models.TextField(default=None)
@@ -58,21 +62,21 @@ class Product(models.Model):
     product = models.TextField(default=None)
     product_code = models.TextField(default=None)
     # product_features',
-    product_id = models.TextField(default=None)
+    # product_id = models.TextField(default=None)
     product_options = models.TextField(default=None)
     # promotions',
     #qty_content = models.TextField()
     qty_step = models.TextField(default=None)
     return_period = models.TextField(default=None)
     selected_options = models.TextField(default=None)
-    seo_name = models.TextField(default=None)
-    seo_path = models.TextField(default=None)
+    seo_name = models.TextField(default=None, null=True)
+    seo_path = models.TextField(default=None, null=True)
     shipping_freight = models.TextField(default=None)
     shipping_params = models.TextField(default=None)
     # 'stickers',
     tax_ids = models.TextField(default=None)
-    taxed_list_price = models.TextField(default=None)
-    taxed_original_price = models.TextField(default=None)
+    taxed_list_price = models.TextField(default=None, null=True)
+    taxed_original_price = models.TextField(default=None, null=True)
     timestamp = models.TextField(default=None)
     tracking = models.TextField(default=None)
     unlimited_download = models.TextField(default=None)
@@ -84,28 +88,31 @@ class Product(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    ITEMS_PER_PAGE = 2000
 
-    ITEMS_PER_PAGE = 10
-
-    
     @classmethod
     def sync_product(cls):
-      products = cls.get_products(page=1)
-      # def filter_product(f, d):
-        # return {k:v for k,v in d.items() if f(k,v)}
-      for item in products:
-        # import pdb; pdb.set_trace()
-        r = cls.filter_product(product=item)
-        
-        product = cls(**r)
-        product.save()
+        total_items = int(cls.get_total_items())
+        total_pages = math.ceil(total_items / cls.ITEMS_PER_PAGE)
+        for num in range(1, total_pages + 1):
+            print(num)
+            products = cls.get_products_from_api(page=num)
+            for item in products:
+
+                r = cls.filter_product(product=item)
+                product_id = r['product_id']
+                print(product_id)
+                obj, created = cls.objects.update_or_create(
+                    product_id=product_id, defaults=r)
+                # product.save()
 
     @classmethod
-    def get_response(cls, items_per_page=ITEMS_PER_PAGE, page=1):
+    def get_response_from_api(cls, items_per_page=ITEMS_PER_PAGE, page=1):
         session = requests.Session()
         session.headers.update(cls.request_header())
         r = session.get('%s/%s' % (cls.api_url(), '/products'), params={
-                        'items_per_page': items_per_page, 'page': page})
+                        'items_per_page': items_per_page, 'page': page,
+                        'sort_by': 'id', 'sort_order': 'asc'})
         return r
 
     @classmethod
@@ -115,20 +122,21 @@ class Product(models.Model):
     @classmethod
     def request_header(cls):
         src = '%s:%s' % (env('EMAIL'), env('SECRET_KEY'))
-        token = 'Basic %s' % base64.b64encode(src.encode('utf-8')).decode('ascii')
+        token = 'Basic %s' % base64.b64encode(
+            src.encode('utf-8')).decode('ascii')
         return {'Authorization': token}
 
     @classmethod
     def get_total_items(cls):
-        return cls.get_response(items_per_page=1).json()['params']['total_items']
+        return cls.get_response_from_api(items_per_page=1).json()['params']['total_items']
 
     @classmethod
-    def get_products(cls, items_per_page=ITEMS_PER_PAGE, page=1):
-        return cls.get_response(items_per_page, page).json()['products']
+    def get_products_from_api(cls, items_per_page=ITEMS_PER_PAGE, page=1):
+        return cls.get_response_from_api(items_per_page, page).json()['products']
 
     @classmethod
     def filter_product(cls, product):
-      return dict([(k,v) for k,v in product.items() if k not in 
-        ['category_ids', 
-        'stickers','main_pair','product_features','discounts','qty_content', 
-        'image_pairs', 'promotions']])
+        return dict([(k, v) for k, v in product.items() if k not in
+                     ['category_ids',
+                      'stickers', 'main_pair', 'product_features', 'discounts', 'qty_content',
+                      'image_pairs', 'promotions']])

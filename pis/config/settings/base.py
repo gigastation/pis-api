@@ -53,7 +53,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'api.apps.ApiConfig',
     'debug_toolbar',
-    'django_extensions',
+    'django_extensions'
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -139,3 +140,5 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 CORS_ORIGIN_ALLOW_ALL = True
+
+SHELL_PLUS = "ipython"
