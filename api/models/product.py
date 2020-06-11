@@ -9,6 +9,10 @@ env = environ.Env()
 
 
 class Product(models.Model):
+
+    def __str__(self):
+        return self.name
+
     product_id = models.IntegerField(primary_key=True)
     name = models.TextField()
     code = models.CharField(max_length=50)
@@ -90,11 +94,11 @@ class Product(models.Model):
     ITEMS_PER_PAGE = 600
 
     @classmethod
-    def sync_product(cls):
+    def sync(cls):
         total_items = int(cls.get_total_items())
         total_pages = total_items // cls.ITEMS_PER_PAGE + 1
         print(f"{total_items}, {total_pages}")
-        for p in range(37, total_pages):
+        for p in range(1, total_pages):
             print(f"{p}目")
             products = cls.get_products(page=p)
             # def filter_product(f, d):

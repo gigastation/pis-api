@@ -89,6 +89,12 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'pis.wsgi.application'
 
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',
+    ]
+}
+
 
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
