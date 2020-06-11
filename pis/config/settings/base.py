@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'api.apps.ApiConfig',
     'debug_toolbar',
     'django_extensions',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
